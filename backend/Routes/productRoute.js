@@ -1,5 +1,6 @@
 const express = require("express");
 const { ProductModel } = require("../Models/Product.model");
+const ErrorHandler = require("../Utils/errorhanler");
 
 const productRouter = express.Router();
 
@@ -12,7 +13,7 @@ productRouter.get("/", async (req, res) => {
 });
 productRouter.get("/:id", async (req, res)=>{
     const products = await ProductModel.findById(req.params.id)
-    if(!products) return res.status(500).json({success: false, message: "Product not found"})
+    if(!products) return next(new ErrorHandler("Product not found", 404))
     res.status(200).json({
         success: true,
         products
