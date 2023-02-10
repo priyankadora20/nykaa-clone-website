@@ -1,12 +1,13 @@
 const express = require("express");
 const app = express();
-const errorMiddleware = require("./Middleware/error")
+
 const {connection} = require("./Config/db")
 const {productRouter} = require("./Routes/productRoute")
 app.use(express.json());
 app.get("/", (req, res) => {
     res.send("Welcomea to app");
 });
+
 
 
 app.use("/products", productRouter);
