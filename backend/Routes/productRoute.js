@@ -1,17 +1,18 @@
 const express = require("express");
 const { ProductModel } = require("../Models/Product.model");
 const ErrorHandler = require("../Utils/errorhanler");
-
+const catchAsyncErrors = require("../Middleware/catchAsyncError")
 const productRouter = express.Router();
 
-productRouter.get("/", async (req, res) => {
+productRouter.get("/", catchAsyncErrors(async (req, res) => {
   const products = await ProductModel.find();
   res.status(200).json({
     success: true,
     products,
   });
-});
-productRouter.get("/:id", async (req, res) => {
+}));
+
+productRouter.get("/:id", catchAsyncErrors(async (req, res) => {
   const products = await ProductModel.findById(req.params.id);
   if (!products)
     return res.status(400).json({ success: false, err: "contact to admin" });
@@ -19,14 +20,18 @@ productRouter.get("/:id", async (req, res) => {
     success: true,
     products,
   });
-});
+}));
 productRouter.post("/new", async (req, res) => {
-  console.log(req.body);
+ try{
   const product = await ProductModel.create(req.body);
   res.status(201).json({
     success: true,
     product,
   });
+ }catch(err){
+ return res.status(401).json({success:false, message: err.message})
+ }
+ 
 });
 
 productRouter.put("/edit/:id", async (req, res) => {
@@ -49,7 +54,7 @@ productRouter.put("/edit/:id", async (req, res) => {
   });
 });
 
-productRouter.delete("/delete/:id", async (req, res) => {
+productRouter.delete("/delete/:id", catchAsyncErrors(async (req, res) => {
   const product = await ProductModel.findById(req.params.id);
   if (!product)
     return res
@@ -60,5 +65,5 @@ productRouter.delete("/delete/:id", async (req, res) => {
     success: true,
     message: "Product Deleted Successflly",
   });
-});
+}));
 module.exports = { productRouter };
