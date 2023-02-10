@@ -1,37 +1,48 @@
 const express = require("express");
 const { ProductModel } = require("../Models/Product.model");
 const ErrorHandler = require("../Utils/errorhanler");
-const catchAsyncErrors = require("../Middleware/catchAsyncError")
+const catchAsyncErrors = require("../Middleware/catchAsyncError");
 const productRouter = express.Router();
+const { ApiFeatures } = require("../Utils/apiFeatures");
+productRouter.get(
+  "/",
+  catchAsyncErrors(async (req, res) => {
+    //const products = await ProductModel.find();
+    let resultPerPage = 5
+    const apifeature = new ApiFeatures(ProductModel.find(), req.query)
+      .search()
+      .filter().pagination(resultPerPage)
+    const products = await apifeature.query;
 
-productRouter.get("/", catchAsyncErrors(async (req, res) => {
-  const products = await ProductModel.find();
-  res.status(200).json({
-    success: true,
-    products,
-  });
-}));
+    res.status(200).json({
+      success: true,
+      products,
+    });
+  })
+);
 
-productRouter.get("/:id", catchAsyncErrors(async (req, res) => {
-  const products = await ProductModel.findById(req.params.id);
-  if (!products)
-    return res.status(400).json({ success: false, err: "contact to admin" });
-  res.status(200).json({
-    success: true,
-    products,
-  });
-}));
+productRouter.get(
+  "/:id",
+  catchAsyncErrors(async (req, res) => {
+    const products = await ProductModel.findById(req.params.id);
+    if (!products)
+      return res.status(400).json({ success: false, err: "contact to admin" });
+    res.status(200).json({
+      success: true,
+      products,
+    });
+  })
+);
 productRouter.post("/new", async (req, res) => {
- try{
-  const product = await ProductModel.create(req.body);
-  res.status(201).json({
-    success: true,
-    product,
-  });
- }catch(err){
- return res.status(401).json({success:false, message: err.message})
- }
- 
+  try {
+    const product = await ProductModel.create(req.body);
+    res.status(201).json({
+      success: true,
+      product,
+    });
+  } catch (err) {
+    return res.status(401).json({ success: false, message: err.message });
+  }
 });
 
 productRouter.put("/edit/:id", async (req, res) => {
@@ -54,16 +65,19 @@ productRouter.put("/edit/:id", async (req, res) => {
   });
 });
 
-productRouter.delete("/delete/:id", catchAsyncErrors(async (req, res) => {
-  const product = await ProductModel.findById(req.params.id);
-  if (!product)
-    return res
-      .status(500)
-      .json({ success: false, message: "Product not Found" });
-  await ProductModel.findByIdAndDelete(req.params.id);
-  res.status(200).json({
-    success: true,
-    message: "Product Deleted Successflly",
-  });
-}));
+productRouter.delete(
+  "/delete/:id",
+  catchAsyncErrors(async (req, res) => {
+    const product = await ProductModel.findById(req.params.id);
+    if (!product)
+      return res
+        .status(500)
+        .json({ success: false, message: "Product not Found" });
+    await ProductModel.findByIdAndDelete(req.params.id);
+    res.status(200).json({
+      success: true,
+      message: "Product Deleted Successflly",
+    });
+  })
+);
 module.exports = { productRouter };
