@@ -1,7 +1,7 @@
 const express = require("express");
 const UserModel = require("../Models/User.model");
 const userRouter = express.Router();
-const userml = require("../Models/User.model");
+require('dotenv').config()
 userRouter.post("/signup", async (req, res) => {
   try {
     let { name, email, password } = req.body;
@@ -16,10 +16,17 @@ userRouter.post("/signup", async (req, res) => {
     });
     const token = user.getJWTToken();
 
-    res.status(201).json({
-      success: true,
-      token,
-    });
+    const options = {
+        expires: new Date(
+          Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+        ),
+        httpOnly: true,
+      };
+      return res.status(200).cookie("token", token, options).json({
+        success: true,
+        token,
+        user,
+      });
   } catch (err) {
     return res.status(401).json({ success: false, message: err.message });
   }
@@ -44,13 +51,30 @@ userRouter.post("/login", async (req, res) => {
     }
 
     const token = user.getJWTToken();
-
-    return res.status(200).json({
+    const options = {
+      expires: new Date(
+        Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+      ),
+      httpOnly: true,
+    };
+    return res.status(200).cookie("token", token, options).json({
       success: true,
       token,
+      user,
     });
   } catch (err) {
     return res.status(401).json({ success: false, message: err.message });
   }
 });
+
+userRouter.get("/logout", async (req, res)=>{
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+  })
+  return res.status(200).json({
+    success: true,
+    message: "Logged Out"
+  })
+})
 module.exports = { userRouter };

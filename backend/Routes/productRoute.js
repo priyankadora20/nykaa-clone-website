@@ -4,8 +4,10 @@ const ErrorHandler = require("../Utils/errorhanler");
 const catchAsyncErrors = require("../Middleware/catchAsyncError");
 const productRouter = express.Router();
 const { ApiFeatures } = require("../Utils/apiFeatures");
+const { isAuthenticatedUser, authorizeRoles } = require("../Middleware/auth");
 productRouter.get(
   "/",
+
   catchAsyncErrors(async (req, res) => {
     //const products = await ProductModel.find();
     let resultPerPage = 5;
@@ -36,7 +38,7 @@ productRouter.get(
     });
   })
 );
-productRouter.post("/new", async (req, res) => {
+productRouter.post("/new", isAuthenticatedUser, authorizeRoles("admin"), async (req, res) => {
   try {
     const product = await ProductModel.create(req.body);
     res.status(201).json({
@@ -48,7 +50,7 @@ productRouter.post("/new", async (req, res) => {
   }
 });
 
-productRouter.put("/edit/:id", async (req, res) => {
+productRouter.put("/edit/:id",  isAuthenticatedUser, authorizeRoles("admin"), async (req, res) => {
   let product = await ProductModel.findById(req.params.id);
   if (!product) {
     return res.send(500).json({
@@ -70,6 +72,7 @@ productRouter.put("/edit/:id", async (req, res) => {
 
 productRouter.delete(
   "/delete/:id",
+  isAuthenticatedUser, authorizeRoles("admin"),
   catchAsyncErrors(async (req, res) => {
     const product = await ProductModel.findById(req.params.id);
     if (!product)
