@@ -1,9 +1,9 @@
 const express = require("express");
 const UserModel = require("../Models/User.model");
 const userRouter = express.Router();
-
+const userml = require("../Models/User.model")
 userRouter.post("/signup", async (req, res) => {
-  try {
+ try {
     let { name, email, password } = req.body;
     const user = await UserModel.create({
       name,
@@ -14,8 +14,7 @@ userRouter.post("/signup", async (req, res) => {
         url: "profilePicUrl",
       },
     });
-    const token = UserModel.getJWTToken()
-    //calling via method inside model. 
+    const token = user.getJWTToken()
     
     res.status(201).json({
       success: true,
@@ -25,4 +24,8 @@ userRouter.post("/signup", async (req, res) => {
     return res.status(401).json({ success: false, message: err.message });
   }
 });
+
+userRouter.post("/login", async (req, res)=>{
+    
+})
 module.exports = { userRouter };
