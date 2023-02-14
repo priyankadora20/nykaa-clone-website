@@ -8,14 +8,17 @@ productRouter.get(
   "/",
   catchAsyncErrors(async (req, res) => {
     //const products = await ProductModel.find();
-    let resultPerPage = 5
+    let resultPerPage = 5;
+    const productCount = await ProductModel.countDocuments();
     const apifeature = new ApiFeatures(ProductModel.find(), req.query)
       .search()
-      .filter().pagination(resultPerPage)
+      .filter()
+      .pagination(resultPerPage);
     const products = await apifeature.query;
 
     res.status(200).json({
       success: true,
+      productCount,
       products,
     });
   })

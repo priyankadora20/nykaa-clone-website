@@ -3,7 +3,8 @@ const app = express();
 //Handling Uncaught Exception
 process.on("uncaughtException", err=> console.log(`Err: ${err.message}`))
 const {connection} = require("./Config/db")
-const {productRouter} = require("./Routes/productRoute")
+const {productRouter} = require("./Routes/productRoute");
+const { userRouter } = require("./Routes/userRoute");
 app.use(express.json());
 app.get("/", (req, res) => {
     res.send("Welcomea to app");
@@ -12,6 +13,7 @@ app.get("/", (req, res) => {
 
 
 app.use("/products", productRouter);
+app.use("/user", userRouter)
 const server = app.listen(8080, async () => {
   try {
    await connection;
