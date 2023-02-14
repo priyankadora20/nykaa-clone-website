@@ -1,9 +1,9 @@
 const express = require("express");
 const UserModel = require("../Models/User.model");
 const userRouter = express.Router();
-const userml = require("../Models/User.model")
+const userml = require("../Models/User.model");
 userRouter.post("/signup", async (req, res) => {
- try {
+  try {
     let { name, email, password } = req.body;
     const user = await UserModel.create({
       name,
@@ -14,18 +14,42 @@ userRouter.post("/signup", async (req, res) => {
         url: "profilePicUrl",
       },
     });
-    const token = user.getJWTToken()
-    
+    const token = user.getJWTToken();
+
     res.status(201).json({
       success: true,
-     token,
+      token,
     });
   } catch (err) {
     return res.status(401).json({ success: false, message: err.message });
   }
 });
 
-userRouter.post("/login", async (req, res)=>{
-    
-})
+userRouter.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(401).json({ msg: "Please enter Email and Password" });
+  }
+  try{
+    const user = UserModel.findOne({ email }).select("+password");
+    if (!user)
+      return res
+        .status(401)
+        .json({ msg: "Please enter correct email and password" });
+  
+    const isPasswordMatched = user.comparePassword();
+  
+    if (!isPasswordMatched)
+      return res.status(401).json({ msg: "Enter correct email and password" });
+  
+    const token = user.getJWTToken();
+  
+    res.status(200).json({
+      success: true,
+      token,
+    });
+  }catch(err){
+    return res.status(401).json({ success: false, message: err.message });
+  }
+});
 module.exports = { userRouter };
