@@ -30,25 +30,26 @@ userRouter.post("/login", async (req, res) => {
   if (!email || !password) {
     return res.status(401).json({ msg: "Please enter Email and Password" });
   }
-  try{
-    const user = UserModel.findOne({ email }).select("+password");
-    if (!user)
+  try {
+    const user = await UserModel.findOne({ email }).select("+password");
+    if (!user) {
       return res
         .status(401)
         .json({ msg: "Please enter correct email and password" });
-  
-    const isPasswordMatched = user.comparePassword();
-  
-    if (!isPasswordMatched)
+    }
+
+    const isPasswordMatched = await user.comparePassword(password);
+    if (!isPasswordMatched) {
       return res.status(401).json({ msg: "Enter correct email and password" });
-  
+    }
+
     const token = user.getJWTToken();
-  
-    res.status(200).json({
+
+    return res.status(200).json({
       success: true,
       token,
     });
-  }catch(err){
+  } catch (err) {
     return res.status(401).json({ success: false, message: err.message });
   }
 });
