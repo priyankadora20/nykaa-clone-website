@@ -40,6 +40,10 @@ productRouter.get(
 );
 productRouter.post("/new", isAuthenticatedUser, authorizeRoles("admin"), async (req, res) => {
   try {
+    //Here we are giving id of the user whoever had created that project.
+    //by getting from cookeis from isAuthenticatedUser function
+    
+    req.body.user = req.user.id
     const product = await ProductModel.create(req.body);
     res.status(201).json({
       success: true,
